@@ -59,15 +59,18 @@ void traverse_whitespace_and_comments(FILE* file_to_read) {
 }
 
 void read_camera_data(FILE* file_to_read) {
-
+	// data should be in this format:
+	// camera, width: 0.5, height: 0.5
 }
 
 void read_sphere_data(FILE* file_to_read) {
-
+	// data should be in this format:
+	// sphere, color: [1.0, 0, 0], position: [0, 2, 5], radius: 2
 }
 
 void read_plane_data(FILE* file_to_read) {
-	
+	// data should be in this format:
+	// plane, color: [0, 0, 1.0], position: [0, 0, 0], normal: [0, 1, 0]
 }
 
 
@@ -89,21 +92,16 @@ int main(int argc, char *argv[]) {
 	// always read binary
 	FILE* file_handle_in = fopen(argv[3], "rb"); // open file for reading
 	// capture width and height values
-	int img_width = (int)argv[1];
-	int img_height = (int)argv[2];
+	int img_width = atoi(argv[1]);
+	int img_height = atoi(argv[2]);
 	// allocate memory for pixel buffer
 	pixmap1d = malloc(sizeof(Pixel)*img_width*img_height);
 	// allocate memory for shapes array, maximum possible shapes = 128
 	shapes_list = malloc(sizeof(Shape)*128);
 	// variable to check for end of file
 	unsigned char eof_check;
-	// working variables for each read pass
+	// variable to capture object type and determine read function
 	unsigned char *object_type = malloc(7*sizeof(char));
-	double width, height;
-	double colors_arr[3];
-	int position_arr[3];
-	int radius;
-	int normal_arr[3];
 	// begin reading shape data
 	// as long as the next read of fscanf returns 1, there is still a valid character to read
 	while ((int)fscanf(file_handle_in, "%c", &eof_check) == 1)
@@ -115,22 +113,20 @@ int main(int argc, char *argv[]) {
 		// trim the trailing comma
 		object_type[strlen(object_type) - 1] = 0;
 		// switch on the type of object
-		switch (object_type) {
-			case 'camera' :
-				break;
-			case 'sphere' :
-				break;
-			case 'plane' :
-				break;
-			default:
-				fprintf(stderr, "Error: Invalid object.");
-				return 1;
+		if (strcmp(object_type, "camera") == 1) {
+
+		}
+		else if (strcmp(object_type, "sphere") == 1) {
+
+		}
+		else if (strcmp(object_type, "plane") == 1) {
+
+		}
+		else {
+			fprintf(stderr, "Error: Invalid object.");
+			return 1;
 		}
 	}
-
-	// skip any whitespace before the start of the line
-	traverse_whitespace_and_comments(file_handle_in);
-
 	// close the input file before exiting
 	fclose(file_handle_in);
 	return 0;
