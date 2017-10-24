@@ -16,9 +16,8 @@ typedef struct Pixel {
 // NOTE: all shapes share the same definition,
 // but some fields are unused
 typedef struct Shape {
-	int type, x_pos, y_pos, z_pos, radius; // 1 = camera, 2 = sphere, 3 = plane
+	int type, x_pos, y_pos, z_pos, radius, a_norm, b_norm, c_norm; // 1 = camera, 2 = sphere, 3 = plane
 	double width, height, r_color, g_color, b_color;
-  // TODO: implement plane primitives
 } Shape;
 
 
@@ -126,6 +125,55 @@ void read_sphere_data(FILE* file_to_read, int obj_index) {
 void read_plane_data(FILE* file_to_read, int obj_index) {
 	// data should be in this format:
 	// plane, color: [0, 0, 1.0], position: [0, 0, 0], normal: [0, 1, 0]
+	wastebasket = malloc(10*sizeof(char)); // initialize a junk data variable
+	shapes_list[obj_index].type = 3;
+	fscanf(file_to_read, "%s", wastebasket); // read past color identifier
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fgetc(file_to_read); // skip over left bracket
+	fscanf(file_to_read, "%lf", &shapes_list[obj_index].r_color); // read in red color value
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%lf", &shapes_list[obj_index].g_color); // read in green color value
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%lf", &shapes_list[obj_index].b_color); // read in blue color value
+	fgetc(file_to_read); // skip over right bracket
+	fgetc(file_to_read); // skip over comma
+	fscanf(file_to_read, "%s", wastebasket); // read past position identifier
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fgetc(file_to_read); // skip over left bracket
+	fscanf(file_to_read, "%d", &shapes_list[obj_index].x_pos); // read in x position
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%d", &shapes_list[obj_index].y_pos); // read in y position
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read);
+	fscanf(file_to_read, "%d", &shapes_list[obj_index].z_pos); // read in z position
+	fgetc(file_to_read); // skip over right bracket
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip spaces
+	fscanf(file_to_read, "%s", wastebasket); // read past radius identifier
+	traverse_whitespace_and_comments(file_to_read); // skip spaces
+	fgetc(file_to_read); // skip over left bracket
+	fscanf(file_to_read, "%d", &shapes_list[obj_index].a_norm); // read in first normal value
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip spaces
+	fscanf(file_to_read, "%d", &shapes_list[obj_index].b_norm); // read in second normal value
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip spaces
+	fscanf(file_to_read, "%d", &shapes_list[obj_index].c_norm); // read in third normal value
+	fgetc(file_to_read); // skip over right bracket
+	printf("%d\n", shapes_list[obj_index].type);
+	printf("%lf\n", shapes_list[obj_index].r_color);
+	printf("%lf\n", shapes_list[obj_index].g_color);
+	printf("%lf\n", shapes_list[obj_index].b_color);
+	printf("%d\n", shapes_list[obj_index].x_pos);
+	printf("%d\n", shapes_list[obj_index].y_pos);
+	printf("%d\n", shapes_list[obj_index].z_pos);
+	printf("%d\n", shapes_list[obj_index].a_norm);
+	printf("%d\n", shapes_list[obj_index].b_norm);
+	printf("%d\n", shapes_list[obj_index].c_norm);
+	free(wastebasket); // free the junk data pointer
 }
 
 
@@ -153,8 +201,6 @@ int main(int argc, char *argv[]) {
 	// capture width and height values
 	int img_width = atoi(argv[1]);
 	int img_height = atoi(argv[2]);
-	// allocate memory for pixel buffer
-	pixmap1d = malloc(sizeof(Pixel)*img_width*img_height);
 	// allocate memory for shapes array, maximum possible shapes = 128
 	shapes_list = malloc(sizeof(Shape)*128);
 	// initialize a shape object counter
@@ -163,24 +209,8 @@ int main(int argc, char *argv[]) {
 	unsigned char eof_check;
 	// variable to capture object type and determine read function
 	unsigned char *object_type = malloc(7*sizeof(char));
-	fscanf(file_handle_in, "%s", object_type);
-	read_camera_data(file_handle_in, shape_count);
-	shape_count++;
-	fscanf(file_handle_in, "%s", object_type);
-	printf("%s\n", object_type);
-	read_sphere_data(file_handle_in, shape_count);
-	shape_count++;
-	fscanf(file_handle_in, "%s", object_type);
-	printf("%s\n", object_type);
-	read_sphere_data(file_handle_in, shape_count);
-	shape_count++;
-	fscanf(file_handle_in, "%s", object_type);
-	printf("%s\n", object_type);
-	read_sphere_data(file_handle_in, shape_count);
-	shape_count++;
 	// begin reading shape data
 	// as long as the next read of fscanf returns 1, there is still a valid character to read
-	/*
 	while ((int)fscanf(file_handle_in, "%c", &eof_check) == 1)
 	{
 		// back up one character
@@ -192,21 +222,30 @@ int main(int argc, char *argv[]) {
 		printf("%s\n", object_type);
 		// switch on the type of object
 		if (strcmp(object_type, "camera") == 0) {
-			//read_camera_data(file_handle_in, shape_count);
 			printf("read: camera\n");
+			read_camera_data(file_handle_in, shape_count);
+			shape_count++;
 		}
 		else if (strcmp(object_type, "sphere") == 0) {
-
+			printf("read: sphere\n");
+			read_sphere_data(file_handle_in, shape_count);
+			shape_count++;
 		}
 		else if (strcmp(object_type, "plane") == 0) {
-
+			printf("read: plane\n");
+			read_plane_data(file_handle_in, shape_count);
+			shape_count++;
 		}
 		else {
 			fprintf(stderr, "Error: Invalid object.");
 			return 1;
 		}
 	}
-	*/
+	// decrement shape_count so it can be used as a max index
+	shape_count--;
+	// allocate memory for pixel buffer
+	pixmap1d = malloc(sizeof(Pixel)*img_width*img_height);
+	// TODO: do something with shape data
 	// close the input file before exiting
 	fclose(file_handle_in);
 	return 0;
