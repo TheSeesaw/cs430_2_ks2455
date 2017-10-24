@@ -25,6 +25,7 @@ typedef struct Shape {
 
 Pixel *pixmap1d;
 Shape *shapes_list;
+Shape *camera_obj;
 unsigned char *wastebasket;
 unsigned char space = ' ';
 unsigned char newline = '\n';
@@ -56,25 +57,25 @@ void traverse_whitespace_and_comments(FILE* file_to_read) {
 	ungetc(current_char, file_to_read);
 }
 
-void read_camera_data(FILE* file_to_read, int obj_index) {
+void read_camera_data(FILE* file_to_read) {
 	// data should be in this format:
 	// camera, width: 0.5, height: 0.5
 	wastebasket = malloc(10*sizeof(char)); // initialize a junk data variable
-	shapes_list[obj_index].type = 1;
+	(*camera_obj).type = 1;
 	fscanf(file_to_read, "%s", wastebasket); // read past the width identifier
 	if (strcmp(wastebasket, "width:") != 0) { // use it for error checking
 		fprintf(stderr, "Error: Invalid camera width format");
 	}
-	fscanf(file_to_read, "%lf", &shapes_list[obj_index].width); // capture the width value
+	fscanf(file_to_read, "%lf", &(*camera_obj).width); // capture the width value
 	fscanf(file_to_read, "%s", wastebasket); // read past the trailing comma
 	fscanf(file_to_read, "%s", wastebasket); //read past the height identifier
 	if (strcmp(wastebasket, "height:") != 0) { // use it for error checking
 		fprintf(stderr, "Error: Invalid camera height format");
 	}
-	fscanf(file_to_read, "%lf", &shapes_list[obj_index].height); // capture the height value
-	printf("%d\n", shapes_list[obj_index].type);
-	printf("%lf\n", shapes_list[obj_index].width);
-	printf("%lf\n", shapes_list[obj_index].height);
+	fscanf(file_to_read, "%lf", &(*camera_obj).height); // capture the height value
+	printf("%d\n", (*camera_obj).type);
+	printf("%lf\n", (*camera_obj).width);
+	printf("%lf\n", (*camera_obj).height);
 	free(wastebasket); // free the junk data pointer
 }
 
@@ -203,6 +204,8 @@ int main(int argc, char *argv[]) {
 	int img_height = atoi(argv[2]);
 	// allocate memory for shapes array, maximum possible shapes = 128
 	shapes_list = malloc(sizeof(Shape)*128);
+	// allocate memory for the camera object
+	camera_obj = malloc(sizeof(Shape));
 	// initialize a shape object counter
 	int shape_count = 0;
 	// variable to check for end of file
@@ -223,8 +226,7 @@ int main(int argc, char *argv[]) {
 		// switch on the type of object
 		if (strcmp(object_type, "camera") == 0) {
 			printf("read: camera\n");
-			read_camera_data(file_handle_in, shape_count);
-			shape_count++;
+			read_camera_data(file_handle_in);
 		}
 		else if (strcmp(object_type, "sphere") == 0) {
 			printf("read: sphere\n");
@@ -245,7 +247,26 @@ int main(int argc, char *argv[]) {
 	shape_count--;
 	// allocate memory for pixel buffer
 	pixmap1d = malloc(sizeof(Pixel)*img_width*img_height);
-	// TODO: do something with shape data
+	// initialize Pij vector
+	double pij_x, pij_y = 0;
+	double pij_z = -1;
+	// iterate through all the pixels
+	int w_index, h_index = 0;
+	for (; w_index < img_width; w_index++)
+	{
+		// compute x coord
+		pij_x = ((camera_obj.width / -2) +
+						(w_index * (camera_obj.width / img_width)) +
+						(0.5 (camera_obj.width / img_width)));
+		for (; h_index < img_height; h_index++)
+		{
+			// compute y coord
+			pij_y = ((camera_obj.height / -2) +
+			        (h_index * (camera_obj.height / img_height)) +
+							(0.5 (camera_obj.height / img_height)));
+		}
+	}
+
 	// close the input file before exiting
 	fclose(file_handle_in);
 	return 0;
