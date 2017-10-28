@@ -194,11 +194,11 @@ double distance_between_positions(int a_x, int a_y, int a_z, int b_x, int b_y, i
 }
 
 
-int sphere_intersection(Shape *shape, int rd_x, int rd_y, int rd_z)
+int sphere_intersection(Shape *sphere, int rd_x, int rd_y, int rd_z)
 {
 	double dot_prod_ray_sphere;
 	// get the dot product of the raycast ray and the sphere's position, derefernce struct fields
-	dot_prod_ray_sphere = (((*shape).x_pos * rd_x) + ((*shape).y_pos * rd_y) + ((*shape).z_pos * rd_z));
+	dot_prod_ray_sphere = (((*sphere).x_pos * rd_x) + ((*sphere).y_pos * rd_y) + ((*sphere).z_pos * rd_z));
 	// a negative product indicates a miss
 	if (dot_prod_ray_sphere <= 0)
 	{
@@ -210,8 +210,16 @@ int sphere_intersection(Shape *shape, int rd_x, int rd_y, int rd_z)
 	rd_z *= dot_prod_ray_sphere;
 	// get distance between closest point and sphere center, passing the ray as point a
 	// and the sphere's center as point b, pass dereferenced struct fields
-	double distance_to_sphere_center = distance_between_positions(rd_x, rd_y, rd_z, (*shape).x_pos, (*shape).y_pos, (*shape).z_pos);
-
+	double distance_to_sphere_center = distance_between_positions(rd_x, rd_y, rd_z, (*sphere).x_pos, (*sphere).y_pos, (*sphere).z_pos);
+	// if distance to center is less than radius, closest point is on sphere, HIT
+	if (distance_to_sphere_center <=  (*sphere.radius))
+	{
+		return 1; // 1 indicates a hit
+	}
+	else // else distance to center is greater than radius, MISS
+	{
+		return 0; // 0 indicates a miss
+	}
 }
 
 
@@ -314,11 +322,13 @@ int main(int argc, char *argv[]) {
 			{
 				// get a pointer to the current shape
 				current_shape = &shapes_list[shape_index];
+				// initialize variable to hold intersection test result
+				int intersection_test_result = 0; // defaults to a miss
 				// check each for an intersection, switching on the type of object
 				switch(shapes_list[shape_index].type)
 				{
 					case 1 :
-						sphere_intersection(current_shape, pij_x, pij_y, pij_z);
+						intersection_test_result = sphere_intersection(current_shape, pij_x, pij_y, pij_z);
 						break;
 					case 2 :
 						break;
