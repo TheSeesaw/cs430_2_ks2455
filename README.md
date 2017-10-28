@@ -6,4 +6,5 @@ Compiles with 'make' while inside the project_2 directory
 
 Usage:$ raycast width height [input file] output.ppm
 
-Known Issues: compiles with warnings, does not function
+Known Issues: intersection tests always fail, resulting in a plain black image,
+              crashes if width and height are set too high (~400)
