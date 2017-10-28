@@ -24,7 +24,7 @@ typedef struct Shape {
 
 // GLOBAL VARIABLES
 
-Pixel *pixmap1d;
+Pixel *pixel_buffer;
 Shape *shapes_list;
 Shape *camera_obj;
 unsigned char *wastebasket;
@@ -194,7 +194,7 @@ double distance_between_positions(int a_x, int a_y, int a_z, int b_x, int b_y, i
 }
 
 
-int sphere_intersection(Shape *sphere, int rd_x, int rd_y, int rd_z)
+double sphere_intersection(Shape *sphere, int rd_x, int rd_y, int rd_z)
 {
 	double dot_prod_ray_sphere;
 	// get the dot product of the raycast ray and the sphere's position, derefernce struct fields
@@ -202,7 +202,7 @@ int sphere_intersection(Shape *sphere, int rd_x, int rd_y, int rd_z)
 	// a negative product indicates a miss
 	if (dot_prod_ray_sphere <= 0)
 	{
-		return 0; // 0 indicates a miss
+		return -1.0; // NULL indicates a miss
 	}
 	// a positive product indicates a possible hit
 	rd_x *= dot_prod_ray_sphere; // scale the vector to get point of closest intersection
@@ -212,13 +212,14 @@ int sphere_intersection(Shape *sphere, int rd_x, int rd_y, int rd_z)
 	// and the sphere's center as point b, pass dereferenced struct fields
 	double distance_to_sphere_center = distance_between_positions(rd_x, rd_y, rd_z, (*sphere).x_pos, (*sphere).y_pos, (*sphere).z_pos);
 	// if distance to center is less than radius, closest point is on sphere, HIT
-	if (distance_to_sphere_center <=  (*sphere.radius))
+	if (distance_to_sphere_center <=  (*sphere).radius)
 	{
-		return 1; // 1 indicates a hit
+		// a hit, calculate distance to closest point
+		return 1.0;
 	}
 	else // else distance to center is greater than radius, MISS
 	{
-		return 0; // 0 indicates a miss
+		return -1.0; // 0.0 indicates a miss
 	}
 }
 
@@ -289,7 +290,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	// allocate memory for pixel buffer
-	pixmap1d = malloc(sizeof(Pixel)*img_width*img_height);
+	pixel_buffer = malloc(sizeof(Pixel)*img_width*img_height);
 	// initialize Pij vector
 	double pij_x, pij_y = 0;
 	double pij_z = -1;
@@ -317,26 +318,57 @@ int main(int argc, char *argv[]) {
 			pij_x /= ray_length;
 			pij_y /= ray_length;
 			pij_z /= ray_length;
-			// iterate through the objects list
+			// initialize a variable for the shape with the closest intersection point
+			int closest_shape_index = -1; // defaults to out of bounds
+			// initialize a variable for distance to closest intersection
+			double closest_intersect_dis = INFINITY;
+			// iterate through the objects list for each pixel
 			for (; shape_index < shape_count; shape_index++)
 			{
 				// get a pointer to the current shape
 				current_shape = &shapes_list[shape_index];
-				// initialize variable to hold intersection test result
-				int intersection_test_result = 0; // defaults to a miss
+				// initialize variable to hold intersection test result, null indicates no intersection
+				double intersection_test_result = -1.0; // defaults to a miss
+				// initialize variable to hold the distance between closest point and camera
 				// check each for an intersection, switching on the type of object
 				switch(shapes_list[shape_index].type)
 				{
 					case 1 :
 						intersection_test_result = sphere_intersection(current_shape, pij_x, pij_y, pij_z);
+						printf("Intersection result was a: %lf", intersection_test_result);
 						break;
 					case 2 :
+						//intersection_test_result = plane_intersection(current_shape, pij_x, pij_y, pij_z);
 						break;
 					case 3 :
 						break;
 					default:
 						fprintf(stderr, "Error: Attempted intersection test on unknown object type.");
 				}
+				// update closest shape
+				if (intersection_test_result > 0) // intersection was a hit
+				{
+					// test most recent shape against current closest shape
+					if (intersection_test_result < closest_intersect_dis)
+					{
+						// update closest shape index and distance
+						closest_shape_index = shape_index;
+						closest_intersect_dis = intersection_test_result;
+					}
+				}
+			}
+			// done with shapes, color pixel based on the results of cloest_shape_index
+			if (closest_shape_index == -1) // no intersections, color pixel black
+			{
+				pixel_buffer[(w_index * img_width) + (h_index * img_width)].r = 0;
+				pixel_buffer[(w_index * img_width) + (h_index * img_width)].g = 0;
+				pixel_buffer[(w_index * img_width) + (h_index * img_width)].b = 0;
+			}
+			else // else, color of closest intersected object
+			{
+				pixel_buffer[(w_index * img_width) + (h_index * img_width)].r = shapes_list[closest_shape_index].r_color;
+				pixel_buffer[(w_index * img_width) + (h_index * img_width)].g = shapes_list[closest_shape_index].g_color;
+				pixel_buffer[(w_index * img_width) + (h_index * img_width)].b = shapes_list[closest_shape_index].b_color;
 			}
 		}
 	}
