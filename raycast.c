@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 
 // STRUCT DEFINITIONS
@@ -73,9 +74,11 @@ void read_camera_data(FILE* file_to_read) {
 		fprintf(stderr, "Error: Invalid camera height format");
 	}
 	fscanf(file_to_read, "%lf", &(*camera_obj).height); // capture the height value
+	/*
 	printf("%d\n", (*camera_obj).type);
 	printf("%lf\n", (*camera_obj).width);
 	printf("%lf\n", (*camera_obj).height);
+	*/
 	free(wastebasket); // free the junk data pointer
 }
 
@@ -106,12 +109,14 @@ void read_sphere_data(FILE* file_to_read, int obj_index) {
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read);
 	fscanf(file_to_read, "%d", &shapes_list[obj_index].z_pos); // read in z position
+	shapes_list[obj_index].z_pos *= -1;
 	fgetc(file_to_read); // skip over right bracket
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
 	fscanf(file_to_read, "%s", wastebasket); // read past radius identifier
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
 	fscanf(file_to_read, "%d", &shapes_list[obj_index].radius);
+	/*
 	printf("%d\n", shapes_list[obj_index].type);
 	printf("%lf\n", shapes_list[obj_index].r_color);
 	printf("%lf\n", shapes_list[obj_index].g_color);
@@ -120,6 +125,7 @@ void read_sphere_data(FILE* file_to_read, int obj_index) {
 	printf("%d\n", shapes_list[obj_index].y_pos);
 	printf("%d\n", shapes_list[obj_index].z_pos);
 	printf("%d\n", shapes_list[obj_index].radius);
+	*/
 	free(wastebasket); // free the junk data pointer
 }
 
@@ -150,6 +156,7 @@ void read_plane_data(FILE* file_to_read, int obj_index) {
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read);
 	fscanf(file_to_read, "%d", &shapes_list[obj_index].z_pos); // read in z position
+	shapes_list[obj_index].z_pos *= -1; // right hand coordinate system
 	fgetc(file_to_read); // skip over right bracket
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
@@ -164,6 +171,7 @@ void read_plane_data(FILE* file_to_read, int obj_index) {
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
 	fscanf(file_to_read, "%d", &shapes_list[obj_index].c_norm); // read in third normal value
 	fgetc(file_to_read); // skip over right bracket
+	/*
 	printf("%d\n", shapes_list[obj_index].type);
 	printf("%lf\n", shapes_list[obj_index].r_color);
 	printf("%lf\n", shapes_list[obj_index].g_color);
@@ -174,7 +182,36 @@ void read_plane_data(FILE* file_to_read, int obj_index) {
 	printf("%d\n", shapes_list[obj_index].a_norm);
 	printf("%d\n", shapes_list[obj_index].b_norm);
 	printf("%d\n", shapes_list[obj_index].c_norm);
+	*/
 	free(wastebasket); // free the junk data pointer
+}
+
+// calculates the distance between to points in space
+double distance_between_positions(int a_x, int a_y, int a_z, int b_x, int b_y, int b_z)
+{
+	// return the distance formula applied to points
+  return sqrt(pow(a_x - b_x, 2) + pow(a_y - b_y, 2) + pow(a_z - b_z, 2));
+}
+
+
+int sphere_intersection(Shape *shape, int rd_x, int rd_y, int rd_z)
+{
+	double dot_prod_ray_sphere;
+	// get the dot product of the raycast ray and the sphere's position, derefernce struct fields
+	dot_prod_ray_sphere = (((*shape).x_pos * rd_x) + ((*shape).y_pos * rd_y) + ((*shape).z_pos * rd_z));
+	// a negative product indicates a miss
+	if (dot_prod_ray_sphere <= 0)
+	{
+		return 0; // 0 indicates a miss
+	}
+	// a positive product indicates a possible hit
+	rd_x *= dot_prod_ray_sphere; // scale the vector to get point of closest intersection
+	rd_y *= dot_prod_ray_sphere;
+	rd_z *= dot_prod_ray_sphere;
+	// get distance between closest point and sphere center, passing the ray as point a
+	// and the sphere's center as point b, pass dereferenced struct fields
+	double distance_to_sphere_center = distance_between_positions(rd_x, rd_y, rd_z, (*shape).x_pos, (*shape).y_pos, (*shape).z_pos);
+
 }
 
 
@@ -243,27 +280,54 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 	}
-	// decrement shape_count so it can be used as a max index
-	shape_count--;
 	// allocate memory for pixel buffer
 	pixmap1d = malloc(sizeof(Pixel)*img_width*img_height);
 	// initialize Pij vector
 	double pij_x, pij_y = 0;
 	double pij_z = -1;
+	Shape *current_shape;
+	// dereference camera attributes for easier reading
+	double c_w = (*camera_obj).width;
+	double c_h = (*camera_obj).height;
 	// iterate through all the pixels
-	int w_index, h_index = 0;
+	int w_index, h_index, shape_index = 0;
 	for (; w_index < img_width; w_index++)
 	{
 		// compute x coord
-		pij_x = ((camera_obj.width / -2) +
-						(w_index * (camera_obj.width / img_width)) +
-						(0.5 (camera_obj.width / img_width)));
+		pij_x = ((c_w / -2) +
+						(w_index * (c_w / img_width)) +
+						(0.5 * (c_w / img_width)));
 		for (; h_index < img_height; h_index++)
 		{
 			// compute y coord
-			pij_y = ((camera_obj.height / -2) +
-			        (h_index * (camera_obj.height / img_height)) +
-							(0.5 (camera_obj.height / img_height)));
+			pij_y = ((c_h / -2) +
+			        (h_index * (c_h / img_height)) +
+							(0.5 * (c_h / img_height)));
+
+			// normalize Rd
+			double ray_length = sqrt((pij_x * pij_x) + (pij_y * pij_y) + (pij_z * pij_z));
+			pij_x /= ray_length;
+			pij_y /= ray_length;
+			pij_z /= ray_length;
+			// iterate through the objects list
+			for (; shape_index < shape_count; shape_index++)
+			{
+				// get a pointer to the current shape
+				current_shape = &shapes_list[shape_index];
+				// check each for an intersection, switching on the type of object
+				switch(shapes_list[shape_index].type)
+				{
+					case 1 :
+						sphere_intersection(current_shape, pij_x, pij_y, pij_z);
+						break;
+					case 2 :
+						break;
+					case 3 :
+						break;
+					default:
+						fprintf(stderr, "Error: Attempted intersection test on unknown object type.");
+				}
+			}
 		}
 	}
 
