@@ -1,12 +1,12 @@
-// struct for vectors and points
-typedef struct Vector {
+// struct for Vector3ds and points
+typedef struct Vector3d {
   double x, y, z;
-} Vector;
+} Vector3d;
 
-Vector* vector_add(Vector* output, Vector* operand_a, Vector* operand_b);
+Vector3d* Vector3d_add(Vector3d* output, Vector3d* operand_a, Vector3d* operand_b);
 
-Vector* vector_sub(Vector* output, Vector* operand_a, Vector* operand_b);
+Vector3d* Vector3d_sub(Vector3d* output, Vector3d* operand_a, Vector3d* operand_b);
 
-Vector* vector_dot_prod(Vector* output, Vector* operand_a, Vector* operand_b);
+double Vector3d_dot_prod(double output, Vector3d* operand_a, Vector3d* operand_b);
 
-Vector* vector_cross_prod(Vector* output, Vector* operand_a, Vector* operand_b);
+Vector3d* Vector3d_cross_prod(Vector3d* output, Vector3d* operand_a, Vector3d* operand_b);
