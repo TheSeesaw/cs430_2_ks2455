@@ -7,6 +7,7 @@
 int res_width, res_height;
 Shape *camera = NULL;
 Shape *shapes_list = NULL;
+double *view_plane = NULL;
 
 // main function for the raycaster performs the following:
 //  - reads a csv file for objects in a scene
@@ -29,13 +30,13 @@ int main(int argc, char *argv[]) {
 	shapes_list = malloc(128*sizeof(Shape)); // initialize shapes list
 	camera = malloc(sizeof(Shape)); // initialize camera object
   // Read file
-
 	read_object_file_director(argv[3], camera, shapes_list);
 	// read width and height
   res_width = atoi(argv[1]);
   res_height = atoi(argv[2]);
+	//view_plane =
   // Perform raycasting
-
+	//construct_view_plane()
   // Write results
 	free(camera);
 	free(shapes_list);

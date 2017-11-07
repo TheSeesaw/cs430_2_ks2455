@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "vector.h" // include vectors for shape positions
+//#include "vector.h" // include vectors for shape positions
 
 #define MISS INFINITY
 
@@ -14,7 +14,8 @@ typedef struct Pixel {
 typedef struct Shape {
 	enum ObjType type;
 	double width, height, radius;
-	Vector3d *position, *color, *normal;
+	//Vector3d *position, *color, *normal;
+	double pos_x, pos_y, pos_z, color_r, color_g, color_b, norm_x, norm_y, norm_z;
 } Shape;
 /*
 // fake polymorphism for shapes

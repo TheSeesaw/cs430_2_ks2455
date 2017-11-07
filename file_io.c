@@ -62,32 +62,32 @@ void read_sphere_data(FILE* file_to_read, Shape* output_list, int obj_index) {
 	fscanf(file_to_read, "%s", wastebasket); // read past color identifier
 	traverse_whitespace_and_comments(file_to_read); // skip over spaces
 	fgetc(file_to_read); // skip over left bracket
-	fscanf(file_to_read, "%lf", &output_list[obj_index].color->x); // read in red color value
+	fscanf(file_to_read, "%lf", &output_list[obj_index].color_r); // read in red color value
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip over spaces
-	fscanf(file_to_read, "%lf", &output_list[obj_index].color->y); // read in green color value
+	fscanf(file_to_read, "%lf", &output_list[obj_index].color_g); // read in green color value
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip over spaces
-	fscanf(file_to_read, "%lf", &output_list[obj_index].color->z); // read in blue color value
+	fscanf(file_to_read, "%lf", &output_list[obj_index].color_b); // read in blue color value
 	fgetc(file_to_read); // skip over right bracket
 	fgetc(file_to_read); // skip over comma
-  /*
 	fscanf(file_to_read, "%s", wastebasket); // read past position identifier
 	traverse_whitespace_and_comments(file_to_read); // skip over spaces
 	fgetc(file_to_read); // skip over left bracket
-	fscanf(file_to_read, "%d", &shapes_list[obj_index].x_pos); // read in x position
+	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_x); // read in x position
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip over spaces
-	fscanf(file_to_read, "%d", &shapes_list[obj_index].y_pos); // read in y position
+	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_y); // read in y position
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read);
-	fscanf(file_to_read, "%d", &shapes_list[obj_index].z_pos); // read in z position
+	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_z); // read in z position
 	fgetc(file_to_read); // skip over right bracket
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
 	fscanf(file_to_read, "%s", wastebasket); // read past radius identifier
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
-	fscanf(file_to_read, "%d", &shapes_list[obj_index].radius);
+	fscanf(file_to_read, "%lf", &output_list[obj_index].radius);
+	/*
 	printf("Type: %d\n", shapes_list[obj_index].type);
 	printf("R Channel: %lf\n", shapes_list[obj_index].r_color);
 	printf("G Channel: %lf\n", shapes_list[obj_index].g_color);
@@ -98,6 +98,7 @@ void read_sphere_data(FILE* file_to_read, Shape* output_list, int obj_index) {
 	printf("Radius: %d\n", shapes_list[obj_index].radius);
   */
 	free(wastebasket); // free the junk data pointer
+	printf("sphere good\n");
 }
 
 
@@ -114,8 +115,8 @@ int read_object_file_director(char *in_file_name, Shape *camera, Shape *output_l
   // read in the camera
   read_camera_data(file_handle_in, camera);
   // read a single sphere
-	//fscanf(file_handle_in, "%s", type_string); // NOTE: temporary: read past sphere identifier
-  //read_sphere_data(file_handle_in, output_list, object_index);
+	fscanf(file_handle_in, "%s", type_string); // NOTE: temporary: read past sphere identifier
+  read_sphere_data(file_handle_in, output_list, object_index);
   // TODO: read objects
   /*
   while (fscanf(file_handle_in, "%s", type_string) == 1) // next object type stored in type_string
