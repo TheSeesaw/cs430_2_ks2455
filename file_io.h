@@ -11,6 +11,12 @@ typedef struct Pixel {
 	unsigned char r, g, b;
 } Pixel;
 
+typedef struct Shape {
+	enum ObjType type;
+	double width, height, radius;
+	Vector3d *position, *color, *normal;
+} Shape;
+/*
 // fake polymorphism for shapes
 typedef struct Shape {
 	enum ObjType type;
@@ -31,6 +37,7 @@ typedef struct Shape {
 		} plane;
 	};
 } Shape;
+*/
 
 void traverse_whitespace_and_comments(FILE *file_to_read);
 

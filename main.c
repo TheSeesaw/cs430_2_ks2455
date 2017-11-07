@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
 	shapes_list = malloc(128*sizeof(Shape)); // initialize shapes list
 	camera = malloc(sizeof(Shape)); // initialize camera object
   // Read file
+
 	read_object_file_director(argv[3], camera, shapes_list);
 	// read width and height
   res_width = atoi(argv[1]);
