@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "file_io.h"
 
 #define MAX_OBJECTS 128
@@ -145,7 +144,9 @@ int read_object_file_director(char *in_file_name, Shape *camera, Shape *output_l
 }
 
 // writes pixel data to a P6 .ppm file in binary
+/*
 int write_pixels_to_p6(Pixel *buffer)
 {
   return 1;
 }
+*/

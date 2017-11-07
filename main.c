@@ -2,12 +2,13 @@
 // By: Kristoffer Schindele
 #include <stdlib.h>
 #include "file_io.h"
+#include "raycast.h"
 
 // GLOBAL VARIABLES //
 int res_width, res_height;
 Shape *camera = NULL;
 Shape *shapes_list = NULL;
-double *view_plane = NULL;
+Point *view_plane = NULL;
 
 // main function for the raycaster performs the following:
 //  - reads a csv file for objects in a scene
@@ -34,10 +35,18 @@ int main(int argc, char *argv[]) {
 	// read width and height
   res_width = atoi(argv[1]);
   res_height = atoi(argv[2]);
-	//view_plane =
+	view_plane = malloc(res_width*res_height*sizeof(Point));
   // Perform raycasting
-	//construct_view_plane()
+	construct_view_plane(view_plane, res_width, res_height, camera->width, camera->height);
+	// print view plane coords
+	int total_length = res_width * res_height;
+	for (int ind = 0; ind < total_length; ind++)
+	{
+		printf("Pij #%d (%lf, %lf, %lf)\n", (ind+1), view_plane[ind].x, view_plane[ind].y, view_plane[ind].z);
+	}
   // Write results
+	// Free memory
+	free(view_plane);
 	free(camera);
 	free(shapes_list);
 	return 0;
