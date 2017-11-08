@@ -80,6 +80,7 @@ void read_sphere_data(FILE* file_to_read, Shape* output_list, int obj_index) {
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read);
 	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_z); // read in z position
+	output_list[obj_index].pos_z *= -1;
 	fgetc(file_to_read); // skip over right bracket
 	fgetc(file_to_read); // skip over comma
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
@@ -97,7 +98,6 @@ void read_sphere_data(FILE* file_to_read, Shape* output_list, int obj_index) {
 	printf("Radius: %d\n", shapes_list[obj_index].radius);
   */
 	free(wastebasket); // free the junk data pointer
-	printf("sphere good\n");
 }
 
 
@@ -139,7 +139,6 @@ int read_object_file_director(char *in_file_name, Shape *camera, Shape *output_l
   }
   */
   fclose(file_handle_in);
-	printf("good\n");
   return 0;
 }
 

@@ -2,9 +2,20 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include "file_io.h"
 #include "raycast.h"
 
-// TODO
+
+// calculates the distance between to points in space
+double distance_between_points(Point *point_a, Point *point_b)
+{
+	// return the distance formula applied to points
+  return sqrt(pow(point_a->x - point_b->x, 2)
+         + pow(point_a->y - point_b->y, 2)
+         + pow(point_a->z - point_b->z, 2));
+}
+
+// constructs an array of points through which rays can be cast to build a scene
 void construct_view_plane(Point *view_plane1d, double res_width, double res_height, double cam_width, double cam_height)
 {
   int index1d = 0;
@@ -27,4 +38,39 @@ void construct_view_plane(Point *view_plane1d, double res_width, double res_heig
       view_plane1d[index1d].z = pij_z;
     }
   }
+}
+
+// raytraces through a single point on the view plane to check intersection
+// returns the distance to closest intersection
+double sphere_intersection(Shape *sphere, Vector3d *normal_ray)
+{
+  Vector3d *sphere_pos = malloc(sizeof(Vector3d)); // initialize a vector for sphere position
+  sphere_pos->x = sphere->pos_x;
+  sphere_pos->y = sphere->pos_y;
+  sphere_pos->z = sphere->pos_z;
+  double dot_product = 0.0;
+  dot_product = Vector3d_dot_prod(sphere_pos, normal_ray);
+  printf("Dot Product: %lf\n", dot_product);
+  //TODO: replace with real return value
+  return 1.0;
+}
+
+// takes in a shape and the view plane array,
+// and passes them to the appropriate intersection test function
+double intersection_test_director(Shape *current_shape, Vector3d *normal_ray)
+{
+  double intersection_test_result = -INFINITY;
+  if (current_shape->type == Sphere) // sphere intersection test
+  {
+    intersection_test_result = sphere_intersection(current_shape, normal_ray);
+  }
+  else if (current_shape->type == Plane) // plane intersection test
+  {
+    // TODO
+  }
+  else
+  {
+    // TODO: Return an error code
+  }
+  return intersection_test_result;
 }

@@ -23,10 +23,10 @@ Vector3d* Vector3d_sub(Vector3d* output, Vector3d* operand_a, Vector3d* operand_
   return output;
 }
 
-double Vector3d_dot_prod(double output, Vector3d* operand_a, Vector3d* operand_b)
+double Vector3d_dot_prod(Vector3d* operand_a, Vector3d* operand_b)
 {
   // perform 3d vector dot product multiplication
-  output = (operand_a->x * operand_b->x) + (operand_a->y * operand_b->y) + (operand_a->z * operand_b->z);
+  double output = (operand_a->x * operand_b->x) + (operand_a->y * operand_b->y) + (operand_a->z * operand_b->z);
   return output;
 }
 
