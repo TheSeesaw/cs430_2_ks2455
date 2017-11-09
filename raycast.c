@@ -45,21 +45,51 @@ void construct_view_plane(Point *view_plane1d, double res_width, double res_heig
 double sphere_intersection(Shape *sphere, Vector3d *normal_ray)
 {
   Vector3d *sphere_pos = malloc(sizeof(Vector3d)); // initialize a vector for sphere position
-  sphere_pos->x = sphere->pos_x;
+  sphere_pos->x = sphere->pos_x; // save sphere position data in vector
   sphere_pos->y = sphere->pos_y;
   sphere_pos->z = sphere->pos_z;
-  double dot_product = 0.0;
+  double dot_product = 0.0; // initialize variable to hold dot product result
+  // compute dot product between sphere position and Rd
   dot_product = Vector3d_dot_prod(sphere_pos, normal_ray);
-  printf("Dot Product: %lf\n", dot_product);
-  //TODO: replace with real return value
-  return 1.0;
+  free(sphere_pos); // done with sphere position vector
+  if (dot_product <= 0) { // if closest intersection is 0 or negative
+    return INFINITY; // return a miss
+  } // else, a possible hit
+  // create points for sphere center and point of closest intersection
+  Point *sphere_center = malloc(sizeof(Point));
+  Point *closest_intersection = malloc(sizeof(Point));
+  // assign sphere center values
+  sphere_center->x = sphere->pos_x;
+  sphere_center->y = sphere->pos_y;
+  sphere_center->z = sphere->pos_z;
+  // scale each value of the the normal_ray by the dot product to get point of closest intersection
+  closest_intersection->x = (normal_ray->x * dot_product);
+  closest_intersection->y = (normal_ray->y * dot_product);
+  closest_intersection->z = (normal_ray->z * dot_product);
+  // calculate the distance between the sphere center and the closest intersection
+  double distance_from_intersection_to_center = distance_between_points(sphere_center, closest_intersection);
+  free(sphere_center); // done with intermediate structs
+  free(closest_intersection);
+  // if distance is less than sphere radius, it's a hit
+  if (distance_from_intersection_to_center < sphere->radius)
+  {
+    //printf("HIT! Distance: %lf\n", distance_from_intersection_to_center);
+    return distance_from_intersection_to_center; // return the distance
+  }
+  else // else, it's a miss
+  {
+    //printf("MISS!\n");
+    return INFINITY;
+  }
 }
 
 // takes in a shape and the view plane array,
 // and passes them to the appropriate intersection test function
+// returns distance to closest intersection if there was a hit,
+// or -INFINITY if it was a miss
 double intersection_test_director(Shape *current_shape, Vector3d *normal_ray)
 {
-  double intersection_test_result = -INFINITY;
+  double intersection_test_result = INFINITY;
   if (current_shape->type == Sphere) // sphere intersection test
   {
     intersection_test_result = sphere_intersection(current_shape, normal_ray);
@@ -70,7 +100,8 @@ double intersection_test_director(Shape *current_shape, Vector3d *normal_ray)
   }
   else
   {
-    // TODO: Return an error code
+    fprintf(stderr, "ERROR: unrecognized shape.");
+    return INFINITY;
   }
   return intersection_test_result;
 }
