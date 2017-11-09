@@ -83,6 +83,33 @@ double sphere_intersection(Shape *sphere, Vector3d *normal_ray)
   }
 }
 
+double plane_intersection(Shape *plane, Vector3d *normal_ray)
+{
+  Vector3d *plane_norm = malloc(sizeof(Vector3d)); // initialize a vector for plane normal
+  plane_norm->x = plane->norm_x;
+  plane_norm->y = plane->norm_y;
+  plane_norm->z = plane->norm_z;
+  // get the dot product of the normal ray and the plane's normal
+  double norm_ray_dot_product = Vector3d_dot_prod(plane_norm, normal_ray);
+  Vector3d *plane_pos = malloc(sizeof(Vector3d)); // initialize a vector for plane position
+  plane_pos->x = plane->pos_x;
+  plane_pos->y = plane->pos_y;
+  plane_pos->z = plane->pos_z;
+  // get the dot product of the plane's position and normal
+  double pos_norm_dot_product = Vector3d_dot_prod(plane_norm, plane_pos);
+  double intersection_test = (-1 * (pos_norm_dot_product / norm_ray_dot_product));
+  free(plane_pos); // done with intermediate structs
+  free(plane_norm);
+  if (intersection_test <= 0) // miss
+  {
+    return INFINITY;
+  }
+  else // else, a hit
+  {
+    return intersection_test;
+  }
+}
+
 // takes in a shape and the view plane array,
 // and passes them to the appropriate intersection test function
 // returns distance to closest intersection if there was a hit,
@@ -96,7 +123,7 @@ double intersection_test_director(Shape *current_shape, Vector3d *normal_ray)
   }
   else if (current_shape->type == Plane) // plane intersection test
   {
-    // TODO
+    intersection_test_result = plane_intersection(current_shape, normal_ray);
   }
   else
   {

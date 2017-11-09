@@ -88,19 +88,75 @@ void read_sphere_data(FILE* file_to_read, Shape* output_list, int obj_index) {
 	traverse_whitespace_and_comments(file_to_read); // skip spaces
 	fscanf(file_to_read, "%lf", &output_list[obj_index].radius);
 	/*
-	printf("Type: %d\n", shapes_list[obj_index].type);
-	printf("R Channel: %lf\n", shapes_list[obj_index].r_color);
-	printf("G Channel: %lf\n", shapes_list[obj_index].g_color);
-	printf("B Channel: %lf\n", shapes_list[obj_index].b_color);
-	printf("X Pos: %d\n", shapes_list[obj_index].x_pos);
-	printf("Y Pos: %d\n", shapes_list[obj_index].y_pos);
-	printf("Z Pos: %d\n", shapes_list[obj_index].z_pos);
-	printf("Radius: %d\n", shapes_list[obj_index].radius);
+	printf("Type: %d\n", output_list[obj_index].type);
+	printf("R Channel: %lf\n", output_list[obj_index].color_r);
+	printf("G Channel: %lf\n", output_list[obj_index].color_g);
+	printf("B Channel: %lf\n", output_list[obj_index].color_b);
+	printf("X Pos: %lf\n", output_list[obj_index].pos_x);
+	printf("Y Pos: %lf\n", output_list[obj_index].pos_y);
+	printf("Z Pos: %lf\n", output_list[obj_index].pos_z);
+	printf("Radius: %lf\n", output_list[obj_index].radius);
   */
 	free(wastebasket); // free the junk data pointer
 }
 
-
+void read_plane_data(FILE* file_to_read, Shape* output_list, int obj_index)
+{
+	// data should be in this format:
+	// sphere, color: [1.0, 0, 0], position: [0, 2, 5], normal: [0, 1, 0]
+	char *wastebasket = malloc(10*sizeof(char)); // initialize a junk data variable
+	output_list[obj_index].type = Plane;
+	fscanf(file_to_read, "%s", wastebasket); // read past color identifier
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fgetc(file_to_read); // skip over left bracket
+	fscanf(file_to_read, "%lf", &output_list[obj_index].color_r); // read in red color value
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%lf", &output_list[obj_index].color_g); // read in green color value
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%lf", &output_list[obj_index].color_b); // read in blue color value
+	fgetc(file_to_read); // skip over right bracket
+	fgetc(file_to_read); // skip over comma
+	fscanf(file_to_read, "%s", wastebasket); // read past position identifier
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fgetc(file_to_read); // skip over left bracket
+	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_x); // read in x position
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_y); // read in y position
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read);
+	fscanf(file_to_read, "%lf", &output_list[obj_index].pos_z); // read in z position
+	output_list[obj_index].pos_z *= -1;
+	fgetc(file_to_read); // skip over right bracket
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip spaces
+	fscanf(file_to_read, "%s", wastebasket); // read past normal identifier
+	traverse_whitespace_and_comments(file_to_read); // skip spaces
+	fgetc(file_to_read); // skip over left bracket
+	fscanf(file_to_read, "%lf", &output_list[obj_index].norm_x); // read in x normal
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read); // skip over spaces
+	fscanf(file_to_read, "%lf", &output_list[obj_index].norm_y); // read in y normal
+	fgetc(file_to_read); // skip over comma
+	traverse_whitespace_and_comments(file_to_read);
+	fscanf(file_to_read, "%lf", &output_list[obj_index].norm_z); // read in z normal
+	fgetc(file_to_read); // skip over right bracket
+	/*
+	printf("Type: %d\n", output_list[obj_index].type);
+	printf("R Channel: %lf\n", output_list[obj_index].color_r);
+	printf("G Channel: %lf\n", output_list[obj_index].color_g);
+	printf("B Channel: %lf\n", output_list[obj_index].color_b);
+	printf("X Pos: %lf\n", output_list[obj_index].pos_x);
+	printf("Y Pos: %lf\n", output_list[obj_index].pos_y);
+	printf("Z Pos: %lf\n", output_list[obj_index].pos_z);
+	printf("X Norm: %lf\n", output_list[obj_index].norm_x);
+	printf("Y Norm: %lf\n", output_list[obj_index].norm_y);
+	printf("Z Norm: %lf\n", output_list[obj_index].norm_z);
+	*/
+	free(wastebasket); // free the junk data pointer
+}
 /* reads the camera object information, then calls read functions for each Shape
    in the input file
 */
@@ -125,7 +181,7 @@ int read_object_file_director(char *in_file_name, Shape *camera, Shape *output_l
     }
     else if (strcmp(type_string, "plane") == 0)
     {
-      //read_plane_data(file_handle_in);
+      read_plane_data(file_handle_in, output_list, object_index);
     }
     else
     {

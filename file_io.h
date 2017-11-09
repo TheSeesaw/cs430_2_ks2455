@@ -23,6 +23,8 @@ void read_camera_data(FILE *file_to_read, Shape *camera);
 
 void read_sphere_data(FILE *file_to_read, Shape *output_list, int obj_index);
 
+void read_plane_data(FILE* file_to_read, Shape* output_list, int obj_index);
+
 int read_object_file_director(char *in_file_name, Shape *camera, Shape *output_list);
 
 int write_pixels_to_p6(Pixel *buffer, char *out_file_name, int res_width, int res_height);

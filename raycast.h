@@ -11,4 +11,6 @@ void construct_view_plane(Point *view_plane1d, double res_width, double res_heig
 
 double sphere_intersection(Shape *sphere, Vector3d *normal_ray);
 
+double plane_intersection(Shape *plane, Vector3d *normal_ray);
+
 double intersection_test_director(Shape *current_shape, Vector3d *normal_ray);
