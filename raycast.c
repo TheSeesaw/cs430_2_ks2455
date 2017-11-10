@@ -91,21 +91,30 @@ double plane_intersection(Shape *plane, Vector3d *normal_ray)
   plane_norm->z = plane->norm_z;
   // get the dot product of the normal ray and the plane's normal
   double norm_ray_dot_product = Vector3d_dot_prod(plane_norm, normal_ray);
+  //printf("Plane normal and Normal Ray dot product result: %lf\n", norm_ray_dot_product);
+  if (norm_ray_dot_product == 0) { // if that dot product results in a 0, return a miss
+    //printf("MISS!\n");
+    return INFINITY;
+  }
   Vector3d *plane_pos = malloc(sizeof(Vector3d)); // initialize a vector for plane position
   plane_pos->x = plane->pos_x;
   plane_pos->y = plane->pos_y;
   plane_pos->z = plane->pos_z;
   // get the dot product of the plane's position and normal
   double pos_norm_dot_product = Vector3d_dot_prod(plane_norm, plane_pos);
-  double intersection_test = (-1 * (pos_norm_dot_product / norm_ray_dot_product));
+  //printf("Plane normal and Plane Pos dot product result: %lf\n", pos_norm_dot_product);
+  double intersection_test = pos_norm_dot_product / norm_ray_dot_product;
+  //printf("Intersection test result: %lf\n", intersection_test);
   free(plane_pos); // done with intermediate structs
   free(plane_norm);
-  if (intersection_test <= 0) // miss
+  if (intersection_test < 0) // miss
   {
+    //printf("MISS!\n");
     return INFINITY;
   }
   else // else, a hit
   {
+    //printf("HIT: %lf\n", intersection_test);
     return intersection_test;
   }
 }
